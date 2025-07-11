@@ -1,0 +1,7 @@
+Year,Sector,Subsector,Gas,Activity,Emission Factor,Unit
+2020,Energy,Electricity Generation,CO2,500000,0.45,kgCO2/kWh
+2020,Energy,Transport,CO2,300000,2.31,kgCO2/L
+2020,Agriculture,Livestock Enteric CH4,CH4,10000,0.023,kgCH4/head
+2021,Energy,Electricity Generation,CO2,520000,0.45,kgCO2/kWh
+2021,Energy,Transport,CO2,320000,2.31,kgCO2/L
+2021,Agriculture,Livestock Enteric CH4,CH4,11000,0.023,kgCH4/head
