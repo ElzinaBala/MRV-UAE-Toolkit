@@ -1,7 +1,169 @@
-Year,Sector,Subsector,Gas,Activity,Emission Factor,Unit
-2020,Energy,Electricity Generation,CO2,500000,0.45,kgCO2/kWh
-2020,Energy,Transport,CO2,300000,2.31,kgCO2/L
-2020,Agriculture,Livestock Enteric CH4,CH4,10000,0.023,kgCH4/head
-2021,Energy,Electricity Generation,CO2,520000,0.45,kgCO2/kWh
-2021,Energy,Transport,CO2,320000,2.31,kgCO2/L
-2021,Agriculture,Livestock Enteric CH4,CH4,11000,0.023,kgCH4/head
+Year,Sector,Gas,Activity,Emission Factor,Unit
+2015,Energy,CO2,44798,2.8,Terajoules (TJ)
+2015,Energy,CH4,44798,0.035,Terajoules (TJ)
+2015,Energy,N2O,44798,0.01,Terajoules (TJ)
+2015,Energy,HFCs,44798,0.0003,Terajoules (TJ)
+2015,Energy,PFCs,44798,3e-05,Terajoules (TJ)
+2015,Energy,SF6,44798,3e-06,Terajoules (TJ)
+2015,IPPU,CO2,37367,1.9,Tonnes of Product
+2015,IPPU,CH4,37367,0.02,Tonnes of Product
+2015,IPPU,N2O,37367,0.005,Tonnes of Product
+2015,IPPU,HFCs,37367,0.0002,Tonnes of Product
+2015,IPPU,PFCs,37367,2e-05,Tonnes of Product
+2015,IPPU,SF6,37367,2e-06,Tonnes of Product
+2015,AFOLU,CO2,21870,1.5,Head of Cattle / Hectares
+2015,AFOLU,CH4,21870,0.04,Head of Cattle / Hectares
+2015,AFOLU,N2O,21870,0.015,Head of Cattle / Hectares
+2015,AFOLU,HFCs,21870,0.0001,Head of Cattle / Hectares
+2015,AFOLU,PFCs,21870,1e-05,Head of Cattle / Hectares
+2015,AFOLU,SF6,21870,1e-06,Head of Cattle / Hectares
+2015,Waste,CO2,12665,2.0,Tonnes of Waste
+2015,Waste,CH4,12665,0.045,Tonnes of Waste
+2015,Waste,N2O,12665,0.012,Tonnes of Waste
+2015,Waste,HFCs,12665,0.00025,Tonnes of Waste
+2015,Waste,PFCs,12665,2.5e-05,Tonnes of Waste
+2015,Waste,SF6,12665,2.5e-06,Tonnes of Waste
+2016,Energy,CO2,65953,2.8,Terajoules (TJ)
+2016,Energy,CH4,65953,0.035,Terajoules (TJ)
+2016,Energy,N2O,65953,0.01,Terajoules (TJ)
+2016,Energy,HFCs,65953,0.0003,Terajoules (TJ)
+2016,Energy,PFCs,65953,3e-05,Terajoules (TJ)
+2016,Energy,SF6,65953,3e-06,Terajoules (TJ)
+2016,IPPU,CO2,39541,1.9,Tonnes of Product
+2016,IPPU,CH4,39541,0.02,Tonnes of Product
+2016,IPPU,N2O,39541,0.005,Tonnes of Product
+2016,IPPU,HFCs,39541,0.0002,Tonnes of Product
+2016,IPPU,PFCs,39541,2e-05,Tonnes of Product
+2016,IPPU,SF6,39541,2e-06,Tonnes of Product
+2016,AFOLU,CO2,24273,1.5,Head of Cattle / Hectares
+2016,AFOLU,CH4,24273,0.04,Head of Cattle / Hectares
+2016,AFOLU,N2O,24273,0.015,Head of Cattle / Hectares
+2016,AFOLU,HFCs,24273,0.0001,Head of Cattle / Hectares
+2016,AFOLU,PFCs,24273,1e-05,Head of Cattle / Hectares
+2016,AFOLU,SF6,24273,1e-06,Head of Cattle / Hectares
+2016,Waste,CO2,12702,2.0,Tonnes of Waste
+2016,Waste,CH4,12702,0.045,Tonnes of Waste
+2016,Waste,N2O,12702,0.012,Tonnes of Waste
+2016,Waste,HFCs,12702,0.00025,Tonnes of Waste
+2016,Waste,PFCs,12702,2.5e-05,Tonnes of Waste
+2016,Waste,SF6,12702,2.5e-06,Tonnes of Waste
+2017,Energy,CO2,43272,2.8,Terajoules (TJ)
+2017,Energy,CH4,43272,0.035,Terajoules (TJ)
+2017,Energy,N2O,43272,0.01,Terajoules (TJ)
+2017,Energy,HFCs,43272,0.0003,Terajoules (TJ)
+2017,Energy,PFCs,43272,3e-05,Terajoules (TJ)
+2017,Energy,SF6,43272,3e-06,Terajoules (TJ)
+2017,IPPU,CO2,26388,1.9,Tonnes of Product
+2017,IPPU,CH4,26388,0.02,Tonnes of Product
+2017,IPPU,N2O,26388,0.005,Tonnes of Product
+2017,IPPU,HFCs,26388,0.0002,Tonnes of Product
+2017,IPPU,PFCs,26388,2e-05,Tonnes of Product
+2017,IPPU,SF6,26388,2e-06,Tonnes of Product
+2017,AFOLU,CO2,19768,1.5,Head of Cattle / Hectares
+2017,AFOLU,CH4,19768,0.04,Head of Cattle / Hectares
+2017,AFOLU,N2O,19768,0.015,Head of Cattle / Hectares
+2017,AFOLU,HFCs,19768,0.0001,Head of Cattle / Hectares
+2017,AFOLU,PFCs,19768,1e-05,Head of Cattle / Hectares
+2017,AFOLU,SF6,19768,1e-06,Head of Cattle / Hectares
+2017,Waste,CO2,12402,2.0,Tonnes of Waste
+2017,Waste,CH4,12402,0.045,Tonnes of Waste
+2017,Waste,N2O,12402,0.012,Tonnes of Waste
+2017,Waste,HFCs,12402,0.00025,Tonnes of Waste
+2017,Waste,PFCs,12402,2.5e-05,Tonnes of Waste
+2017,Waste,SF6,12402,2.5e-06,Tonnes of Waste
+2018,Energy,CO2,45327,2.8,Terajoules (TJ)
+2018,Energy,CH4,45327,0.035,Terajoules (TJ)
+2018,Energy,N2O,45327,0.01,Terajoules (TJ)
+2018,Energy,HFCs,45327,0.0003,Terajoules (TJ)
+2018,Energy,PFCs,45327,3e-05,Terajoules (TJ)
+2018,Energy,SF6,45327,3e-06,Terajoules (TJ)
+2018,IPPU,CO2,33044,1.9,Tonnes of Product
+2018,IPPU,CH4,33044,0.02,Tonnes of Product
+2018,IPPU,N2O,33044,0.005,Tonnes of Product
+2018,IPPU,HFCs,33044,0.0002,Tonnes of Product
+2018,IPPU,PFCs,33044,2e-05,Tonnes of Product
+2018,IPPU,SF6,33044,2e-06,Tonnes of Product
+2018,AFOLU,CO2,16420,1.5,Head of Cattle / Hectares
+2018,AFOLU,CH4,16420,0.04,Head of Cattle / Hectares
+2018,AFOLU,N2O,16420,0.015,Head of Cattle / Hectares
+2018,AFOLU,HFCs,16420,0.0001,Head of Cattle / Hectares
+2018,AFOLU,PFCs,16420,1e-05,Head of Cattle / Hectares
+2018,AFOLU,SF6,16420,1e-06,Head of Cattle / Hectares
+2018,Waste,CO2,6993,2.0,Tonnes of Waste
+2018,Waste,CH4,6993,0.045,Tonnes of Waste
+2018,Waste,N2O,6993,0.012,Tonnes of Waste
+2018,Waste,HFCs,6993,0.00025,Tonnes of Waste
+2018,Waste,PFCs,6993,2.5e-05,Tonnes of Waste
+2018,Waste,SF6,6993,2.5e-06,Tonnes of Waste
+2019,Energy,CO2,52466,2.8,Terajoules (TJ)
+2019,Energy,CH4,52466,0.035,Terajoules (TJ)
+2019,Energy,N2O,52466,0.01,Terajoules (TJ)
+2019,Energy,HFCs,52466,0.0003,Terajoules (TJ)
+2019,Energy,PFCs,52466,3e-05,Terajoules (TJ)
+2019,Energy,SF6,52466,3e-06,Terajoules (TJ)
+2019,IPPU,CO2,24344,1.9,Tonnes of Product
+2019,IPPU,CH4,24344,0.02,Tonnes of Product
+2019,IPPU,N2O,24344,0.005,Tonnes of Product
+2019,IPPU,HFCs,24344,0.0002,Tonnes of Product
+2019,IPPU,PFCs,24344,2e-05,Tonnes of Product
+2019,IPPU,SF6,24344,2e-06,Tonnes of Product
+2019,AFOLU,CO2,10818,1.5,Head of Cattle / Hectares
+2019,AFOLU,CH4,10818,0.04,Head of Cattle / Hectares
+2019,AFOLU,N2O,10818,0.015,Head of Cattle / Hectares
+2019,AFOLU,HFCs,10818,0.0001,Head of Cattle / Hectares
+2019,AFOLU,PFCs,10818,1e-05,Head of Cattle / Hectares
+2019,AFOLU,SF6,10818,1e-06,Head of Cattle / Hectares
+2019,Waste,CO2,8957,2.0,Tonnes of Waste
+2019,Waste,CH4,8957,0.045,Tonnes of Waste
+2019,Waste,N2O,8957,0.012,Tonnes of Waste
+2019,Waste,HFCs,8957,0.00025,Tonnes of Waste
+2019,Waste,PFCs,8957,2.5e-05,Tonnes of Waste
+2019,Waste,SF6,8957,2.5e-06,Tonnes of Waste
+2020,Energy,CO2,40593,2.8,Terajoules (TJ)
+2020,Energy,CH4,40593,0.035,Terajoules (TJ)
+2020,Energy,N2O,40593,0.01,Terajoules (TJ)
+2020,Energy,HFCs,40593,0.0003,Terajoules (TJ)
+2020,Energy,PFCs,40593,3e-05,Terajoules (TJ)
+2020,Energy,SF6,40593,3e-06,Terajoules (TJ)
+2020,IPPU,CO2,25731,1.9,Tonnes of Product
+2020,IPPU,CH4,25731,0.02,Tonnes of Product
+2020,IPPU,N2O,25731,0.005,Tonnes of Product
+2020,IPPU,HFCs,25731,0.0002,Tonnes of Product
+2020,IPPU,PFCs,25731,2e-05,Tonnes of Product
+2020,IPPU,SF6,25731,2e-06,Tonnes of Product
+2020,AFOLU,CO2,22755,1.5,Head of Cattle / Hectares
+2020,AFOLU,CH4,22755,0.04,Head of Cattle / Hectares
+2020,AFOLU,N2O,22755,0.015,Head of Cattle / Hectares
+2020,AFOLU,HFCs,22755,0.0001,Head of Cattle / Hectares
+2020,AFOLU,PFCs,22755,1e-05,Head of Cattle / Hectares
+2020,AFOLU,SF6,22755,1e-06,Head of Cattle / Hectares
+2020,Waste,CO2,6179,2.0,Tonnes of Waste
+2020,Waste,CH4,6179,0.045,Tonnes of Waste
+2020,Waste,N2O,6179,0.012,Tonnes of Waste
+2020,Waste,HFCs,6179,0.00025,Tonnes of Waste
+2020,Waste,PFCs,6179,2.5e-05,Tonnes of Waste
+2020,Waste,SF6,6179,2.5e-06,Tonnes of Waste
+2021,Energy,CO2,44879,2.8,Terajoules (TJ)
+2021,Energy,CH4,44879,0.035,Terajoules (TJ)
+2021,Energy,N2O,44879,0.01,Terajoules (TJ)
+2021,Energy,HFCs,44879,0.0003,Terajoules (TJ)
+2021,Energy,PFCs,44879,3e-05,Terajoules (TJ)
+2021,Energy,SF6,44879,3e-06,Terajoules (TJ)
+2021,IPPU,CO2,32464,1.9,Tonnes of Product
+2021,IPPU,CH4,32464,0.02,Tonnes of Product
+2021,IPPU,N2O,32464,0.005,Tonnes of Product
+2021,IPPU,HFCs,32464,0.0002,Tonnes of Product
+2021,IPPU,PFCs,32464,2e-05,Tonnes of Product
+2021,IPPU,SF6,32464,2e-06,Tonnes of Product
+2021,AFOLU,CO2,12971,1.5,Head of Cattle / Hectares
+2021,AFOLU,CH4,12971,0.04,Head of Cattle / Hectares
+2021,AFOLU,N2O,12971,0.015,Head of Cattle / Hectares
+2021,AFOLU,HFCs,12971,0.0001,Head of Cattle / Hectares
+2021,AFOLU,PFCs,12971,1e-05,Head of Cattle / Hectares
+2021,AFOLU,SF6,12971,1e-06,Head of Cattle / Hectares
+2021,Waste,CO2,12070,2.0,Tonnes of Waste
+2021,Waste,CH4,12070,0.045,Tonnes of Waste
+2021,Waste,N2O,12070,0.012,Tonnes of Waste
+2021,Waste,HFCs,12070,0.00025,Tonnes of Waste
+2021,Waste,PFCs,12070,2.5e-05,Tonnes of Waste
+2021,Waste,SF6,12070,2.5e-06,Tonnes of Waste
