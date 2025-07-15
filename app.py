@@ -1,99 +1,157 @@
 import os
 import pandas as pd
-from dash import Dash, dcc, html, Input, Output
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.graph_objects as go
 
-# Initialize the Dash app
-app = Dash(__name__)
-app.title = "UAE GHG MRV Dashboard"
+# Prepare data
+OUTPUT_DIR = 'outputs'
+CSV_FILE = os.path.join(OUTPUT_DIR, 'emissions_by_sector.csv')
 
-# Load data
-def load_data():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    outputs_dir = os.path.join(base_dir, 'outputs')
-    df_sector = pd.read_csv(os.path.join(outputs_dir, 'emissions_by_sector.csv'))
-    df_gas = pd.read_csv(os.path.join(outputs_dir, 'emissions_by_gas.csv'))
-    df_yearly = pd.read_csv(os.path.join(outputs_dir, 'yearly_emissions_changes.csv'))
-    return df_sector, df_gas, df_yearly
+def ensure_sample_data():
+    if not os.path.exists(CSV_FILE):
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        sample_data = pd.DataFrame({
+            'Sector': ['Energy', 'Agriculture', 'Waste', 'IPPU'] * 3,
+            'Year': [2020, 2020, 2020, 2020, 2021, 2021, 2021, 2021, 2022, 2022, 2022, 2022],
+            'Emissions': [500, 200, 100, 150, 520, 210, 110, 160, 530, 215, 120, 170]
+        })
+        sample_data.to_csv(CSV_FILE, index=False)
+        print(f"Sample data created at: {CSV_FILE}")
 
-df_sector, df_gas, df_yearly = load_data()
+ensure_sample_data()
+df = pd.read_csv(CSV_FILE)
 
-# Dropdown options
-sector_options = [{'label': sector, 'value': sector} for sector in df_sector.columns if sector != 'Year']
-gas_options = [{'label': gas, 'value': gas} for gas in df_gas.columns if gas != 'Year']
+external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
-# App layout
-app.layout = html.Div(style={'font-family': 'Arial, sans-serif', 'margin': '20px'}, children=[
-    html.H1("UAE GHG Emissions Monitoring", style={'textAlign': 'center', 'color': '#003366'}),
+app.layout = html.Div(className='container mt-4', children=[
+    html.H1('GHG Emissions Analytics Dashboard', className='text-center text-primary mb-4'),
 
-    html.Div([
-        html.Div([
-            html.H3("Emissions by Sector", style={'color': '#006699'}),
+    html.Div(className='row', children=[
+        html.Div(className='col-md-6', children=[
+            html.Label('Select Sector:', className='font-weight-bold'),
             dcc.Dropdown(
                 id='sector-dropdown',
-                options=sector_options,
-                value=sector_options[0]['value'] if sector_options else None,
-                style={'marginBottom': '20px'}
-            ),
-            dcc.Graph(id='sector-graph')
-        ], className='six columns', style={'width': '48%', 'display': 'inline-block', 'verticalAlign': 'top'}),
-
-        html.Div([
-            html.H3("Emissions by Gas", style={'color': '#006699'}),
-            dcc.Dropdown(
-                id='gas-dropdown',
-                options=gas_options,
-                value=gas_options[0]['value'] if gas_options else None,
-                style={'marginBottom': '20px'}
-            ),
-            dcc.Graph(id='gas-graph')
-        ], className='six columns', style={'width': '48%', 'display': 'inline-block', 'marginLeft': '4%'})
+                options=[{'label': sector, 'value': sector} for sector in df['Sector'].unique()],
+                value=df['Sector'].unique()[0],
+                className='mb-4'
+            )
+        ]),
+        html.Div(className='col-md-6', children=[
+            html.Label('Select Year:', className='font-weight-bold'),
+            dcc.Slider(
+                id='year-slider',
+                min=df['Year'].min(),
+                max=df['Year'].max(),
+                step=1,
+                value=df['Year'].min(),
+                marks={str(year): str(year) for year in df['Year'].unique()},
+                tooltip={"placement": "bottom", "always_visible": True}
+            )
+        ])
     ]),
 
-    html.H2("Total Annual GHG Emissions", style={'textAlign': 'center', 'color': '#003366', 'marginTop': '40px'}),
-    dcc.Graph(
-        id='total-emissions-graph',
-        figure=px.bar(df_yearly, x='Year', y='Emissions (kg)', color='Emissions (kg)',
-                      title='Total Emissions by Year',
-                      color_continuous_scale='Viridis')
-    ),
+    html.Div(className='row', children=[
+        html.Div(className='col-md-6', children=[dcc.Graph(id='line-plot')]),
+        html.Div(className='col-md-6', children=[dcc.Graph(id='bar-chart')])
+    ]),
 
-    html.H2("Year-over-Year Change (%)", style={'textAlign': 'center', 'color': '#003366', 'marginTop': '40px'}),
-    dcc.Graph(
-        id='change-percentage-graph',
-        figure=px.line(df_yearly, x='Year', y='Change (%)', markers=True,
-                       title='Year-over-Year Percentage Change',
-                       line_shape='spline', render_mode='svg',
-                       color_discrete_sequence=['#FF5733'])
-    )
+    html.Div(className='row mt-4', children=[
+        html.Div(className='col-md-6', children=[dcc.Graph(id='pie-chart')]),
+        html.Div(className='col-md-6', children=[dcc.Graph(id='scatter-plot')])
+    ]),
+
+    html.Div(className='row mt-4', children=[
+        html.Div(className='col-md-6', children=[dcc.Graph(id='heatmap')]),
+        html.Div(className='col-md-6', children=[dcc.Graph(id='box-plot')])
+    ]),
+
+    html.Div(id='summary-stats', className='mt-4 p-3 bg-light border rounded')
 ])
 
-# Callback to update sector emissions graph
 @app.callback(
-    Output('sector-graph', 'figure'),
-    Input('sector-dropdown', 'value')
+    [Output('line-plot', 'figure'),
+     Output('bar-chart', 'figure'),
+     Output('pie-chart', 'figure'),
+     Output('scatter-plot', 'figure'),
+     Output('heatmap', 'figure'),
+     Output('box-plot', 'figure'),
+     Output('summary-stats', 'children')],
+    [Input('sector-dropdown', 'value'),
+     Input('year-slider', 'value')]
 )
-def update_sector_graph(selected_sector):
-    if selected_sector:
-        fig = px.line(df_sector, x='Year', y=selected_sector,
-                      title=f'{selected_sector} Emissions Over Time',
-                      markers=True, color_discrete_sequence=['#1f77b4'])
-        return fig
-    return {}
+def update_dashboard(selected_sector, selected_year):
+    filtered_df = df[df['Sector'] == selected_sector]
+    year_df = df[df['Year'] == selected_year]
 
-# Callback to update gas emissions graph
-@app.callback(
-    Output('gas-graph', 'figure'),
-    Input('gas-dropdown', 'value')
-)
-def update_gas_graph(selected_gas):
-    if selected_gas:
-        fig = px.line(df_gas, x='Year', y=selected_gas,
-                      title=f'{selected_gas} Emissions Over Time',
-                      markers=True, color_discrete_sequence=['#2ca02c'])
-        return fig
-    return {}
+    # Line Plot
+    line_fig = px.line(
+        filtered_df, x='Year', y='Emissions',
+        title=f'Emissions Trend for {selected_sector}',
+        markers=True,
+        color_discrete_sequence=px.colors.sequential.Viridis
+    )
 
-# Run the app
+    # Bar Chart
+    bar_fig = px.bar(
+        year_df, x='Sector', y='Emissions',
+        title=f'Emissions by Sector in {selected_year}',
+        color='Sector',
+        color_discrete_sequence=px.colors.qualitative.Bold
+    )
+
+    # Pie Chart
+    pie_fig = px.pie(
+        year_df, names='Sector', values='Emissions',
+        title=f'Sectoral Contribution in {selected_year}',
+        color_discrete_sequence=px.colors.qualitative.Pastel
+    )
+
+    # Scatter Plot
+    scatter_fig = px.scatter(
+        df, x='Year', y='Emissions',
+        color='Sector',
+        symbol='Sector',
+        title='Scatter of Emissions across Years and Sectors',
+        color_discrete_sequence=px.colors.qualitative.Prism
+    )
+
+    # Heatmap
+    heatmap_data = df.pivot_table(index='Sector', columns='Year', values='Emissions')
+    heatmap_fig = go.Figure(
+        data=go.Heatmap(
+            z=heatmap_data.values,
+            x=heatmap_data.columns,
+            y=heatmap_data.index,
+            colorscale='Viridis'
+        )
+    )
+    heatmap_fig.update_layout(title='Emissions Intensity Heatmap', xaxis_title='Year', yaxis_title='Sector')
+
+    # Box Plot
+    box_fig = px.box(
+        df, x='Sector', y='Emissions',
+        title='Emissions Distribution by Sector',
+        color='Sector',
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+
+    # Summary Stats
+    total_emissions = filtered_df['Emissions'].sum()
+    max_year = filtered_df.loc[filtered_df['Emissions'].idxmax()]['Year']
+    max_emissions = filtered_df['Emissions'].max()
+
+    stats = html.Div([
+        html.H5(f'Total Emissions for {selected_sector}: {total_emissions:.2f} MtCO2e', className='text-success'),
+        html.H5(f'Peak Emissions in {max_year}: {max_emissions:.2f} MtCO2e', className='text-warning'),
+        html.H5(f'Selected Year: {selected_year}', className='text-info')
+    ])
+
+    return line_fig, bar_fig, pie_fig, scatter_fig, heatmap_fig, box_fig, stats
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8000)
