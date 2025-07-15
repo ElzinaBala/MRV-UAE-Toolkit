@@ -16,19 +16,3 @@ https://mrv-uae-toolkit.onrender.com
 - Optional user data upload with validation (planned feature)
 - Exportable reports in CSV, Excel, and PDF formats
 
-## Project Structure
-
-MRV-UAE-Toolkit/
-│
-├── data/ # Raw and mock input data
-├── outputs/ # Generated reports
-├── scripts/ # Processing scripts
-│ ├── ghg_inventory_builder.py
-│ └── generate_mock_inventory.py
-├── dashboard/ # Dash application
-│ └── app.py
-├── requirements.txt # Python dependencies
-├── .gitignore # Git ignore rules
-└── README.md # Project documentation
-
-
