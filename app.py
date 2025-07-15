@@ -1,157 +1,165 @@
 import os
+import io
 import pandas as pd
-import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash import Dash, dcc, html, Input, Output, State, dash_table
 import plotly.express as px
-import plotly.graph_objects as go
+from flask import send_file
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import zipfile
 
-# Prepare data
-OUTPUT_DIR = 'outputs'
-CSV_FILE = os.path.join(OUTPUT_DIR, 'emissions_by_sector.csv')
-
-def ensure_sample_data():
-    if not os.path.exists(CSV_FILE):
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-        sample_data = pd.DataFrame({
-            'Sector': ['Energy', 'Agriculture', 'Waste', 'IPPU'] * 3,
-            'Year': [2020, 2020, 2020, 2020, 2021, 2021, 2021, 2021, 2022, 2022, 2022, 2022],
-            'Emissions': [500, 200, 100, 150, 520, 210, 110, 160, 530, 215, 120, 170]
-        })
-        sample_data.to_csv(CSV_FILE, index=False)
-        print(f"Sample data created at: {CSV_FILE}")
-
-ensure_sample_data()
-df = pd.read_csv(CSV_FILE)
-
-external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = Dash(__name__)
+app.title = "UAE GHG MRV Dashboard"
 server = app.server
 
-app.layout = html.Div(className='container mt-4', children=[
-    html.H1('GHG Emissions Analytics Dashboard', className='text-center text-primary mb-4'),
+REQUIRED_COLUMNS = ['Year', 'Sector', 'Gas', 'Activity', 'Emission Factor', 'Unit']
+processed_data = None
 
-    html.Div(className='row', children=[
-        html.Div(className='col-md-6', children=[
-            html.Label('Select Sector:', className='font-weight-bold'),
-            dcc.Dropdown(
-                id='sector-dropdown',
-                options=[{'label': sector, 'value': sector} for sector in df['Sector'].unique()],
-                value=df['Sector'].unique()[0],
-                className='mb-4'
-            )
-        ]),
-        html.Div(className='col-md-6', children=[
-            html.Label('Select Year:', className='font-weight-bold'),
-            dcc.Slider(
-                id='year-slider',
-                min=df['Year'].min(),
-                max=df['Year'].max(),
-                step=1,
-                value=df['Year'].min(),
-                marks={str(year): str(year) for year in df['Year'].unique()},
-                tooltip={"placement": "bottom", "always_visible": True}
-            )
-        ])
-    ]),
+def load_default_data():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    outputs_dir = os.path.join(base_dir, 'outputs')
+    df_sector = pd.read_csv(os.path.join(outputs_dir, 'emissions_by_sector.csv'))
+    df_gas = pd.read_csv(os.path.join(outputs_dir, 'emissions_by_gas.csv'))
+    df_yearly = pd.read_csv(os.path.join(outputs_dir, 'yearly_emissions_changes.csv'))
+    return df_sector, df_gas, df_yearly
 
-    html.Div(className='row', children=[
-        html.Div(className='col-md-6', children=[dcc.Graph(id='line-plot')]),
-        html.Div(className='col-md-6', children=[dcc.Graph(id='bar-chart')])
-    ]),
+default_sector, default_gas, default_yearly = load_default_data()
 
-    html.Div(className='row mt-4', children=[
-        html.Div(className='col-md-6', children=[dcc.Graph(id='pie-chart')]),
-        html.Div(className='col-md-6', children=[dcc.Graph(id='scatter-plot')])
-    ]),
+app.layout = html.Div([
+    html.H1("UAE GHG Emissions Dashboard"),
 
-    html.Div(className='row mt-4', children=[
-        html.Div(className='col-md-6', children=[dcc.Graph(id='heatmap')]),
-        html.Div(className='col-md-6', children=[dcc.Graph(id='box-plot')])
-    ]),
+    html.H2("Upload Custom GHG Inventory Data (CSV)"),
+    dcc.Upload(
+        id='upload-data',
+        children=html.Div(['Drag and Drop or Select a CSV File']),
+        style={
+            'width': '50%', 'height': '60px', 'lineHeight': '60px',
+            'borderWidth': '1px', 'borderStyle': 'dashed',
+            'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px'
+        },
+        multiple=False
+    ),
+    html.Div(id='upload-status'),
 
-    html.Div(id='summary-stats', className='mt-4 p-3 bg-light border rounded')
+    html.H2("Uploaded Data Preview"),
+    dash_table.DataTable(id='data-preview', page_size=5),
+
+    html.Button("Download Reports (ZIP: Excel + PDF)", id='download-btn', n_clicks=0),
+    dcc.Download(id='download-data'),
+
+    html.H2("Emissions by Sector"),
+    dcc.Graph(id='sector-graph'),
+
+    html.H2("Emissions by Gas"),
+    dcc.Graph(id='gas-graph'),
+
+    html.H2("Total Annual Emissions"),
+    dcc.Graph(id='total-emissions-graph'),
+
+    html.H2("Year-over-Year Change (%)"),
+    dcc.Graph(id='change-percentage-graph')
 ])
 
+def validate_uploaded_data(df):
+    missing = [col for col in REQUIRED_COLUMNS if col not in df.columns]
+    return missing
+
+def process_data(df):
+    df['Emissions (kg)'] = df['Activity'] * df['Emission Factor']
+    sector = df.groupby(['Year', 'Sector'])['Emissions (kg)'].sum().reset_index()
+    gas = df.groupby(['Year', 'Gas'])['Emissions (kg)'].sum().reset_index()
+    yearly = df.groupby('Year')['Emissions (kg)'].sum().reset_index()
+    yearly['Change (%)'] = yearly['Emissions (kg)'].pct_change().fillna(0) * 100
+    return sector, gas, yearly
+
 @app.callback(
-    [Output('line-plot', 'figure'),
-     Output('bar-chart', 'figure'),
-     Output('pie-chart', 'figure'),
-     Output('scatter-plot', 'figure'),
-     Output('heatmap', 'figure'),
-     Output('box-plot', 'figure'),
-     Output('summary-stats', 'children')],
-    [Input('sector-dropdown', 'value'),
-     Input('year-slider', 'value')]
+    Output('upload-status', 'children'),
+    Output('data-preview', 'data'),
+    Output('data-preview', 'columns'),
+    Input('upload-data', 'contents'),
+    State('upload-data', 'filename')
 )
-def update_dashboard(selected_sector, selected_year):
-    filtered_df = df[df['Sector'] == selected_sector]
-    year_df = df[df['Year'] == selected_year]
+def handle_file_upload(contents, filename):
+    global processed_data
+    if contents is None:
+        return '', [], []
 
-    # Line Plot
-    line_fig = px.line(
-        filtered_df, x='Year', y='Emissions',
-        title=f'Emissions Trend for {selected_sector}',
-        markers=True,
-        color_discrete_sequence=px.colors.sequential.Viridis
-    )
+    content_type, content_string = contents.split(',')
+    decoded = pd.read_csv(io.StringIO(content_string))
+    
+    missing = validate_uploaded_data(decoded)
+    if missing:
+        return f"Upload failed. Missing columns: {', '.join(missing)}", [], []
 
-    # Bar Chart
-    bar_fig = px.bar(
-        year_df, x='Sector', y='Emissions',
-        title=f'Emissions by Sector in {selected_year}',
-        color='Sector',
-        color_discrete_sequence=px.colors.qualitative.Bold
-    )
+    sector, gas, yearly = process_data(decoded)
+    processed_data = {'sector': sector, 'gas': gas, 'yearly': yearly}
+    preview_data = decoded.head().to_dict('records')
+    preview_columns = [{"name": i, "id": i} for i in decoded.columns]
+    return f"File '{filename}' uploaded and processed successfully.", preview_data, preview_columns
 
-    # Pie Chart
-    pie_fig = px.pie(
-        year_df, names='Sector', values='Emissions',
-        title=f'Sectoral Contribution in {selected_year}',
-        color_discrete_sequence=px.colors.qualitative.Pastel
-    )
+def generate_pdf_report(yearly_data):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    text = c.beginText(40, 750)
+    text.setFont("Helvetica", 12)
+    text.textLine("UAE GHG Inventory - Yearly Summary Report")
+    text.textLine("")
 
-    # Scatter Plot
-    scatter_fig = px.scatter(
-        df, x='Year', y='Emissions',
-        color='Sector',
-        symbol='Sector',
-        title='Scatter of Emissions across Years and Sectors',
-        color_discrete_sequence=px.colors.qualitative.Prism
-    )
+    for index, row in yearly_data.iterrows():
+        line = f"Year: {row['Year']}, Emissions (kg): {row['Emissions (kg)']:.2f}, Change (%): {row['Change (%)']:.2f}"
+        text.textLine(line)
 
-    # Heatmap
-    heatmap_data = df.pivot_table(index='Sector', columns='Year', values='Emissions')
-    heatmap_fig = go.Figure(
-        data=go.Heatmap(
-            z=heatmap_data.values,
-            x=heatmap_data.columns,
-            y=heatmap_data.index,
-            colorscale='Viridis'
-        )
-    )
-    heatmap_fig.update_layout(title='Emissions Intensity Heatmap', xaxis_title='Year', yaxis_title='Sector')
+    c.drawText(text)
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+    return buffer
 
-    # Box Plot
-    box_fig = px.box(
-        df, x='Sector', y='Emissions',
-        title='Emissions Distribution by Sector',
-        color='Sector',
-        color_discrete_sequence=px.colors.qualitative.Set3
-    )
+@app.callback(
+    Output('download-data', 'data'),
+    Input('download-btn', 'n_clicks')
+)
+def download_reports(n_clicks):
+    if n_clicks == 0 or not processed_data:
+        return None
 
-    # Summary Stats
-    total_emissions = filtered_df['Emissions'].sum()
-    max_year = filtered_df.loc[filtered_df['Emissions'].idxmax()]['Year']
-    max_emissions = filtered_df['Emissions'].max()
+    excel_buffer = io.BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+        processed_data['sector'].to_excel(writer, sheet_name='By Sector', index=False)
+        processed_data['gas'].to_excel(writer, sheet_name='By Gas', index=False)
+        processed_data['yearly'].to_excel(writer, sheet_name='Yearly Changes', index=False)
+    excel_buffer.seek(0)
 
-    stats = html.Div([
-        html.H5(f'Total Emissions for {selected_sector}: {total_emissions:.2f} MtCO2e', className='text-success'),
-        html.H5(f'Peak Emissions in {max_year}: {max_emissions:.2f} MtCO2e', className='text-warning'),
-        html.H5(f'Selected Year: {selected_year}', className='text-info')
-    ])
+    pdf_buffer = generate_pdf_report(processed_data['yearly'])
 
-    return line_fig, bar_fig, pie_fig, scatter_fig, heatmap_fig, box_fig, stats
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, mode='w') as zf:
+        zf.writestr('ghg_inventory_report.xlsx', excel_buffer.read())
+        pdf_buffer.seek(0)
+        zf.writestr('ghg_yearly_summary.pdf', pdf_buffer.read())
+    zip_buffer.seek(0)
+
+    return dcc.send_bytes(zip_buffer.read(), "processed_reports.zip")
+
+@app.callback(Output('sector-graph', 'figure'), Input('upload-data', 'contents'))
+def update_sector_graph(contents):
+    data = processed_data['sector'] if processed_data else default_sector
+    return px.line(data, x='Year', y='Emissions (kg)', color='Sector', title='Emissions by Sector')
+
+@app.callback(Output('gas-graph', 'figure'), Input('upload-data', 'contents'))
+def update_gas_graph(contents):
+    data = processed_data['gas'] if processed_data else default_gas
+    return px.line(data, x='Year', y='Emissions (kg)', color='Gas', title='Emissions by Gas')
+
+@app.callback(Output('total-emissions-graph', 'figure'), Input('upload-data', 'contents'))
+def update_total_emissions_graph(contents):
+    data = processed_data['yearly'] if processed_data else default_yearly
+    return px.bar(data, x='Year', y='Emissions (kg)', title='Total Annual Emissions')
+
+@app.callback(Output('change-percentage-graph', 'figure'), Input('upload-data', 'contents'))
+def update_change_percentage_graph(contents):
+    data = processed_data['yearly'] if processed_data else default_yearly
+    return px.line(data, x='Year', y='Change (%)', markers=True, title='Year-over-Year Emissions Change')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    app.run(debug=True)
